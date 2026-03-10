@@ -1,23 +1,35 @@
-
 <?php
 include("config/database.php");
 
 if(isset($_POST['sell'])){
-
-$product=$_POST['product'];
-$qty=$_POST['qty'];
-
-$r=mysqli_query($conn,"SELECT * FROM products WHERE id='$product'");
-$data=mysqli_fetch_assoc($r);
-
-$total=$data['price']*$qty;
-
-mysqli_query($conn,"INSERT INTO sales(product_id,qty,total)
-VALUES('$product','$qty','$total')");
-
-mysqli_query($conn,"UPDATE products SET stock=stock-$qty WHERE id='$product'");
-
-echo "<div class='alert alert-success'>Sale Completed</div>";
+    $product = $_POST['product'];
+    $qty = $_POST['qty'];
+    
+    // Get product price using prepared statement
+    $stmt = $conn->prepare("SELECT price FROM products WHERE id = ?");
+    $stmt->bind_param("i", $product);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_assoc();
+    $stmt->close();
+    
+    if($data){
+        $total = $data['price'] * $qty;
+        
+        // Insert sale using prepared statement
+        $stmt = $conn->prepare("INSERT INTO sales(product_id, qty, total) VALUES (?, ?, ?)");
+        $stmt->bind_param("idi", $product, $qty, $total);
+        $stmt->execute();
+        $stmt->close();
+        
+        // Update stock using prepared statement
+        $stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+        $stmt->bind_param("ii", $qty, $product);
+        $stmt->execute();
+        $stmt->close();
+        
+        echo "<div class='alert alert-success'>Sale Completed</div>";
+    }
 }
 ?>
 
@@ -29,22 +41,23 @@ echo "<div class='alert alert-success'>Sale Completed</div>";
 
 <form method="POST">
 
-<select class="form-control mb-2" name="product">
+<select class="form-control mb-2" name="product" required>
+<option value="">Select Product</option>
 
 <?php
-$p=mysqli_query($conn,"SELECT * FROM products");
-while($row=mysqli_fetch_assoc($p)){
+$p = $conn->query("SELECT id, name, price, stock FROM products");
+while($row = $p->fetch_assoc()){
 ?>
 
-<option value="<?= $row['id']?>">
-<?= $row['name']?> - ₱<?= $row['price']?> (Stock: <?= $row['stock']?>)
+<option value="<?php echo $row['id']; ?>">
+<?php echo htmlspecialchars($row['name']); ?> - ₱<?php echo $row['price']; ?> (Stock: <?php echo $row['stock']; ?>)
 </option>
 
 <?php } ?>
 
 </select>
 
-<input class="form-control mb-2" name="qty" placeholder="Quantity">
+<input class="form-control mb-2" name="qty" placeholder="Quantity" type="number" required>
 
 <button class="btn btn-primary" name="sell">Sell</button>
 
