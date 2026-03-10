@@ -1,7 +1,7 @@
 
 CREATE DATABASE super_grocery_pos;
 
-USE super_grocery_pos;
+USE pos_db;
 
 CREATE TABLE users(
 id INT AUTO_INCREMENT PRIMARY KEY,
