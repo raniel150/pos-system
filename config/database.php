@@ -1,6 +1,14 @@
 <?php
-$conn = mysqli_connect("localhost","root","","pos_db");
-if(!$conn){
- die("Connection failed: ".mysqli_connect_error());
+$host = 'localhost';
+$username = 'root'; // Change to your MySQL username
+$password = ''; // Change to your MySQL password
+$dbname = 'pos_db'; // Database name as specified
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die('Connection failed: ' . $conn->connect_error);
 }
+
+$conn->set_charset('utf8mb4');
 ?>
