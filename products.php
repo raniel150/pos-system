@@ -1,14 +1,20 @@
-
 <?php
 include("config/database.php");
 
-$search="";
+$search = "";
+$r = null;
 
 if(isset($_GET['search'])){
-$search=$_GET['search'];
-$r=mysqli_query($conn,"SELECT * FROM products WHERE name LIKE '%$search%'");
-}else{
-$r=mysqli_query($conn,"SELECT * FROM products");
+    $search = $_GET['search'];
+    
+    // Use prepared statement for search
+    $stmt = $conn->prepare("SELECT * FROM products WHERE name LIKE ?");
+    $searchTerm = '%' . $search . '%';
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $r = $stmt->get_result();
+} else {
+    $r = $conn->query("SELECT * FROM products");
 }
 ?>
 
@@ -18,8 +24,8 @@ $r=mysqli_query($conn,"SELECT * FROM products");
 
 <h2>Products</h2>
 
-<form class="mb-3">
-<input class="form-control" name="search" placeholder="Search product">
+<form class="mb-3" method="GET">
+<input class="form-control" name="search" placeholder="Search product" value="<?php echo htmlspecialchars($search); ?>">
 </form>
 
 <table class="table table-bordered">
@@ -32,22 +38,22 @@ $r=mysqli_query($conn,"SELECT * FROM products");
 <th>Status</th>
 </tr>
 
-<?php while($row=mysqli_fetch_assoc($r)){ ?>
+<?php while($row=$r->fetch_assoc()){ ?>
 
 <tr>
 
-<td><?= $row['id'] ?></td>
-<td><?= $row['name'] ?></td>
-<td><?= $row['price'] ?></td>
-<td><?= $row['stock'] ?></td>
+<td><?php echo htmlspecialchars($row['id']); ?></td>
+<td><?php echo htmlspecialchars($row['name']); ?></td>
+<td>₱<?php echo htmlspecialchars($row['price']); ?></td>
+<td><?php echo htmlspecialchars($row['stock']); ?></td>
 
 <td>
 
 <?php
-if($row['stock']<=5){
-echo "<span class='badge bg-danger'>LOW STOCK</span>";
-}else{
-echo "<span class='badge bg-success'>OK</span>";
+if($row['stock'] <= 5){
+    echo "<span class='badge bg-danger'>LOW STOCK</span>";
+} else {
+    echo "<span class='badge bg-success'>OK</span>";
 }
 ?>
 
