@@ -1,17 +1,21 @@
-
 <?php
 include("config/database.php");
 
 if(isset($_POST['add'])){
-
-$name=$_POST['name'];
-$price=$_POST['price'];
-$stock=$_POST['stock'];
-
-mysqli_query($conn,"INSERT INTO products(name,price,stock)
-VALUES('$name','$price','$stock')");
-
-echo "Product Added";
+    $name = $_POST['name'];
+    $price = $_POST['price'];
+    $stock = $_POST['stock'];
+    
+    // Use prepared statement
+    $stmt = $conn->prepare("INSERT INTO products(name, price, stock) VALUES (?, ?, ?)");
+    $stmt->bind_param("sdi", $name, $price, $stock);
+    
+    if($stmt->execute()){
+        echo "<div class='alert alert-success'>Product Added Successfully!</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Error: " . $stmt->error . "</div>";
+    }
+    $stmt->close();
 }
 ?>
 
@@ -23,11 +27,11 @@ echo "Product Added";
 
 <form method="POST">
 
-<input class="form-control mb-2" name="name" placeholder="Product name">
+<input class="form-control mb-2" name="name" placeholder="Product name" required>
 
-<input class="form-control mb-2" name="price" placeholder="Price">
+<input class="form-control mb-2" name="price" placeholder="Price" type="number" step="0.01" required>
 
-<input class="form-control mb-2" name="stock" placeholder="Stock">
+<input class="form-control mb-2" name="stock" placeholder="Stock" type="number" required>
 
 <button class="btn btn-success" name="add">Add</button>
 
