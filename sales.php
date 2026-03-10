@@ -1,11 +1,11 @@
-
 <?php
 include("config/database.php");
 
-$r=mysqli_query($conn,"
-SELECT sales.id,products.name,sales.qty,sales.total,sales.date
+$r = $conn->query("
+SELECT sales.id, products.name, sales.qty, sales.total, sales.date
 FROM sales
-JOIN products ON products.id=sales.product_id
+JOIN products ON products.id = sales.product_id
+ORDER BY sales.date DESC
 ");
 ?>
 
@@ -25,14 +25,14 @@ JOIN products ON products.id=sales.product_id
 <th>Date</th>
 </tr>
 
-<?php while($row=mysqli_fetch_assoc($r)){ ?>
+<?php while($row = $r->fetch_assoc()){ ?>
 
 <tr>
-<td><?= $row['id']?></td>
-<td><?= $row['name']?></td>
-<td><?= $row['qty']?></td>
-<td>₱<?= $row['total']?></td>
-<td><?= $row['date']?></td>
+<td><?php echo $row['id']; ?></td>
+<td><?php echo htmlspecialchars($row['name']); ?></td>
+<td><?php echo $row['qty']; ?></td>
+<td>₱<?php echo $row['total']; ?></td>
+<td><?php echo $row['date']; ?></td>
 </tr>
 
 <?php } ?>
