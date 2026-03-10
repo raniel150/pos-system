@@ -1,0 +1,1 @@
+Advanced POS upgrade modules: suppliers, reports, receipt printing, charts, and mobile POS interface.

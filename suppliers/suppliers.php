@@ -1,0 +1,1 @@
+<?php echo 'Suppliers module - list suppliers here'; ?>
