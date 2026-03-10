@@ -1,20 +1,24 @@
-
 <?php
 session_start();
 include("config/database.php");
 
 if(isset($_POST['login'])){
-$user=$_POST['username'];
-$pass=$_POST['password'];
-
-$q=mysqli_query($conn,"SELECT * FROM users WHERE username='$user' AND password='$pass'");
-
-if(mysqli_num_rows($q)>0){
-$_SESSION['user']=$user;
-header("Location: dashboard.php");
-}else{
-$msg="Invalid Login";
-}
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    
+    // Use prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? AND password = ?");
+    $stmt->bind_param("ss", $username, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if($result->num_rows > 0){
+        $_SESSION['user'] = $username;
+        header("Location: dashboard.php");
+    } else {
+        $msg = "Invalid Login";
+    }
+    $stmt->close();
 }
 ?>
 <!DOCTYPE html>
@@ -35,9 +39,9 @@ $msg="Invalid Login";
 
 <form method="POST">
 
-<input class="form-control mb-2" name="username" placeholder="Username">
+<input class="form-control mb-2" name="username" placeholder="Username" required>
 
-<input class="form-control mb-2" type="password" name="password" placeholder="Password">
+<input class="form-control mb-2" type="password" name="password" placeholder="Password" required>
 
 <button class="btn btn-primary w-100" name="login">Login</button>
 
