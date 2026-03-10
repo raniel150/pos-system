@@ -1,5 +1,5 @@
 
-CREATE DATABASE super_grocery_pos;
+CREATE pos_db;
 
 USE pos_db;
 
